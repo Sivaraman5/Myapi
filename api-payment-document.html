@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ReDoc</title>
+    <!-- needed for adaptive design -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+
+    <!--
+    ReDoc doesn't change outer page styles
+    -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <redoc spec-url='./lammapay-account-info-openapi.yaml' expand-responses='all'></redoc> -->
+    <redoc></redoc>
+    <script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"> </script>
+    <script>
+        var expand = () => {
+          // this likely could be narrowed, but this finds all table cells,
+          // and clicks them just in case.
+          document
+            .querySelectorAll("tr:not(.expanded) > td")
+            .forEach(td => td.click());
+        };
+      
+        var observe = ({ elements, action, types }) => {
+          var ddObserver = new MutationObserver(mutations => action(mutations));
+          elements.forEach(dd => ddObserver.observe(dd, types));
+        };
+      
+        var onLoadCallback = err => {
+          // first, watch all buttons to see when the selection changes
+          // then, watch the table and expand all subitems
+          var observables = [
+            {
+              elements: document.querySelectorAll(
+                ".api-content>div>div>div>div>ul>li"
+              ),
+              action: mutations => mutations.forEach(m => expand()),
+              types: {
+                attributes: true
+              }
+            },
+            {
+              elements: document.querySelectorAll(
+                ".api-content>div>div>div>div>table"
+              ),
+              action: expand,
+              types: {
+                attributes: true,
+                subtree: true
+              }
+            }
+          ];
+      
+          observables.forEach(o => observe(o));
+      
+          // once for good measure
+          expand();
+        };
+      
+        Redoc.init(
+          "./lammapay-payment-initiation-openapi.yaml",
+          {
+            jsonSampleExpandLevel: "all",
+            expandResponses: "200,201"
+          },
+          document.querySelector("redoc"),
+          onLoadCallback
+        );
+      </script>
+      <!-- <script>
+      // find all expandable button and click on it
+        const expandInterval = setInterval(() => document
+            .querySelectorAll('tr:not(.expanded) > td > button[aria-label*=expand]')
+            .forEach((btn) => btn.click()), 100);
+
+        // click repeatedly for 1 second, that roughly 10 levels.
+        setTimeout(() => clearInterval(expandInterval), 1000);
+</script> -->
+  </body>
+
+
+</html>
+
